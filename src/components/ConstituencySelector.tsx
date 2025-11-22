@@ -10,12 +10,14 @@ interface Constituency {
 }
 
 const constituencies: Constituency[] = [
-  { id: "1", name: "Mumbai North", state: "Maharashtra", candidates: 5 },
-  { id: "2", name: "Delhi South", state: "Delhi", candidates: 6 },
-  { id: "3", name: "Bangalore Central", state: "Karnataka", candidates: 4 },
-  { id: "4", name: "Kolkata East", state: "West Bengal", candidates: 5 },
-  { id: "5", name: "Chennai North", state: "Tamil Nadu", candidates: 4 },
-  { id: "6", name: "Hyderabad", state: "Telangana", candidates: 5 },
+  { id: "1", name: "Chennai North", state: "Tamil Nadu", candidates: 5 },
+  { id: "2", name: "Chennai Central", state: "Tamil Nadu", candidates: 6 },
+  { id: "3", name: "Chennai South", state: "Tamil Nadu", candidates: 4 },
+  { id: "4", name: "Coimbatore", state: "Tamil Nadu", candidates: 5 },
+  { id: "5", name: "Tiruppur (AC155)", state: "Tamil Nadu", candidates: 4 },
+  { id: "6", name: "Madurai", state: "Tamil Nadu", candidates: 5 },
+  { id: "7", name: "Tiruchirappalli", state: "Tamil Nadu", candidates: 4 },
+  { id: "8", name: "Salem", state: "Tamil Nadu", candidates: 5 },
 ];
 
 interface ConstituencySelectorProps {
