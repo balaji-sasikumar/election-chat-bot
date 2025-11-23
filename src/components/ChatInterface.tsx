@@ -52,6 +52,23 @@ const ChatInterface = ({
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
+  const speakTamil = (text: string, gender: string) => {
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = "ta-IN";
+ if (gender === "M") {  
+    utter.pitch = 0.8;
+    utter.rate = 0.9;
+  } else {
+    utter.pitch = 1.15;
+    utter.rate = 1.05;
+  }
+
+
+  window.speechSynthesis.cancel(); // stop previous speech
+  window.speechSynthesis.speak(utter);
+};
+
+
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -90,6 +107,7 @@ const ChatInterface = ({
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
+      speakTamil(assistantMessage.content, candidateProfile?.demographics?.gender);
     } catch (error: any) {
       console.error("Chat error:", error);
       toast({
@@ -140,6 +158,11 @@ const ChatInterface = ({
     }
   };
 
+  const stopSpeech = () => {
+  window.speechSynthesis.cancel();
+};
+
+
   return (
     <div className="w-full max-w-4xl mx-auto px-4 py-8 h-screen flex flex-col animate-fade-in">
       <div className="mb-4">
@@ -178,6 +201,12 @@ const ChatInterface = ({
               <Sparkles className="h-4 w-4 mr-2" />
               Simulate Interview
             </Button>
+            <Button
+  onClick={stopSpeech}
+  className="ml-2 bg-red-500 hover:bg-red-600 text-white"
+>
+  Stop Speech
+</Button>
           </div>
         </div>
 
