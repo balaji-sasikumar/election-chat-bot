@@ -132,7 +132,7 @@ const Index = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          profile: selectedCandidate.rawProfile,
+          interviewResults
         }),
       });
 
