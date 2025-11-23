@@ -20,7 +20,6 @@ interface Candidate {
   color: string;
   rawProfile: any;
 }
-
 type Step = "constituency" | "candidate" | "chat" | "interview";
 
 const Index = () => {
@@ -179,6 +178,7 @@ const Index = () => {
       {step === "interview" && selectedCandidate && (
         <InterviewView
           candidateName={selectedCandidate.name}
+          partyName={selectedCandidate.rawProfile?.party_leaning || null}
           results={interviewResults}
           predictionResult={predictionResult}
           onBack={handleBackToChat}

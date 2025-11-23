@@ -5,19 +5,31 @@ import { interviewQuestions } from "@/data/interviewQuestions";
 
 interface InterviewViewProps {
   candidateName: string;
+  partyName: string;
   results: Record<string, string>;
   predictionResult: string | null;
   onBack: () => void;
   onPredict: () => void;
 }
 
+const partyLogos: Record<string, string> = {
+  BJP: "/logos/bjp.png",
+  TVK: "/logos/tvk.png",
+  DMK: "/logos/dmk.png",
+  ADMK: "/logos/admk.png",
+  PMK: "/logos/pmk.png",
+  CONGRESS: "/logos/congress.png",
+};
+
 const InterviewView = ({
   candidateName,
+  partyName,
   results,
   predictionResult,
   onBack,
   onPredict,
 }: InterviewViewProps) => {
+  const selectedLogo = partyName ? partyLogos[partyName.toUpperCase()] : partyLogos[predictionResult];
   return (
     <div className="w-full max-w-4xl mx-auto px-4 py-8 animate-fade-in">
       <Button
@@ -85,8 +97,15 @@ const InterviewView = ({
               Predicted Party Leaning
             </h3>
             <div className="text-3xl font-bold text-primary">
-              {predictionResult}
+              {partyName ?? predictionResult}
             </div>
+             {/* Dynamic Party Logo */}
+            {selectedLogo && (
+                  <img
+                    src={selectedLogo}
+                    className="mx-auto w-20 h-20 object-contain"
+                  />
+                )}
           </Card>
         )}
       </div>
