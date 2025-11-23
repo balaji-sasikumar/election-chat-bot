@@ -17,8 +17,10 @@ interface ChatInterfaceProps {
   candidateParty: string;
   candidateDescription: string;
   candidateColor: string;
+  candidateProfile: any;
   constituencyName: string;
   onBack: () => void;
+  onInterviewComplete: (results: Record<string, string>) => void;
 }
 
 const interviewQuestions = [
@@ -34,8 +36,10 @@ const ChatInterface = ({
   candidateParty,
   candidateDescription,
   candidateColor,
+  candidateProfile,
   constituencyName,
   onBack,
+  onInterviewComplete,
 }: ChatInterfaceProps) => {
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -63,41 +67,16 @@ const ChatInterface = ({
     setIsLoading(true);
 
     try {
-      const response = await fetch(
-        "https://84c1rl6p-8000.inc1.devtunnels.ms/api/chat",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            "profile": {
-              "demographics": {
-                "age": "34",
-                "gender": "M",
-                "location": "Gandhi St, Coimbatore, AC112",
-                "family_status": "Father of Gopal"
-              },
-              "political_identity": {
-                "party_member": "TRUE (Renewed: TRUE)",
-                "constituency_history": "District: Coimbatore. Winner: Unknown (Unknown)",
-                "engagement_level": "High"
-              },
-              "digital_behavior": {
-                "content_preferences": "Interested in Literacy Mission campaigns, hashtags: #karur",
-                "engagement_patterns": "Active volunteer. Likes: 35, Retweets: 3",
-                "emotional_tendencies": "High engagement, likely positive sentiment"
-              },
-              "geographic_context": {
-                "booth_number": "22",
-                "constituency": "AC112 - 112",
-                "local_issues": "Inferred from Coimbatore context"
-              }
-            },
-            "question": `${messageText}`
-          }),
-        }
-      );
+      const response = await fetch("http://localhost:8000/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          profile: candidateProfile,
+          question: `${messageText}`,
+        }),
+      });
 
       if (!response.ok) {
         throw new Error("HTTP error " + response.status);
@@ -115,14 +94,14 @@ const ChatInterface = ({
       console.error("Chat error:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to send message. Please try again.",
+        description:
+          error.message || "Failed to send message. Please try again.",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
   };
-
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -131,10 +110,33 @@ const ChatInterface = ({
 
   const simulateInterview = async () => {
     setIsLoading(true);
-    for (const question of interviewQuestions) {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      await sendMessage(question);
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+    try {
+      const response = await fetch("http://localhost:8000/api/interview", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          profile: candidateProfile,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("HTTP error " + response.status);
+      }
+
+      const data = await response.json();
+      onInterviewComplete(data);
+    } catch (error: any) {
+      console.error("Interview error:", error);
+      toast({
+        title: "Error",
+        description:
+          error.message || "Failed to simulate interview. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -151,13 +153,22 @@ const ChatInterface = ({
         <div className="p-6 border-b border-border bg-gradient-primary">
           <div className="flex items-center gap-4">
             <Avatar className="h-14 w-14">
-              <AvatarFallback className={`${candidateColor} text-white text-lg`}>
-                {candidateName.split(' ').map(n => n[0]).join('')}
+              <AvatarFallback
+                className={`${candidateColor} text-white text-lg`}
+              >
+                {candidateName
+                  .split(" ")
+                  .map((n) => n[0])
+                  .join("")}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
-              <h2 className="text-2xl font-bold text-primary-foreground">{candidateName}</h2>
-              <p className="text-sm text-primary-foreground/80">{candidateParty} • {constituencyName}</p>
+              <h2 className="text-2xl font-bold text-primary-foreground">
+                {candidateName}
+              </h2>
+              <p className="text-sm text-primary-foreground/80">
+                {candidateParty} • {constituencyName}
+              </p>
             </div>
             <Button
               onClick={simulateInterview}
@@ -175,23 +186,32 @@ const ChatInterface = ({
             {messages.map((message, index) => (
               <div
                 key={index}
-                className={`flex gap-3 animate-fade-in ${message.role === "user" ? "justify-end" : "justify-start"
-                  }`}
+                className={`flex gap-3 animate-fade-in ${
+                  message.role === "user" ? "justify-end" : "justify-start"
+                }`}
               >
                 {message.role === "assistant" && (
                   <Avatar className="h-8 w-8">
-                    <AvatarFallback className={`${candidateColor} text-white text-xs`}>
-                      {candidateName.split(' ').map(n => n[0]).join('')}
+                    <AvatarFallback
+                      className={`${candidateColor} text-white text-xs`}
+                    >
+                      {candidateName
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")}
                     </AvatarFallback>
                   </Avatar>
                 )}
                 <div
-                  className={`max-w-[70%] rounded-2xl px-4 py-3 ${message.role === "user"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-secondary text-secondary-foreground"
-                    }`}
+                  className={`max-w-[70%] rounded-2xl px-4 py-3 ${
+                    message.role === "user"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-secondary text-secondary-foreground"
+                  }`}
                 >
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                    {message.content}
+                  </p>
                 </div>
                 {message.role === "user" && (
                   <Avatar className="h-8 w-8">
@@ -205,15 +225,29 @@ const ChatInterface = ({
             {isLoading && (
               <div className="flex gap-3 justify-start animate-fade-in">
                 <Avatar className="h-8 w-8">
-                  <AvatarFallback className={`${candidateColor} text-white text-xs`}>
-                    {candidateName.split(' ').map(n => n[0]).join('')}
+                  <AvatarFallback
+                    className={`${candidateColor} text-white text-xs`}
+                  >
+                    {candidateName
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")}
                   </AvatarFallback>
                 </Avatar>
                 <div className="bg-secondary text-secondary-foreground rounded-2xl px-4 py-3">
                   <div className="flex gap-1">
-                    <div className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "0ms" }} />
-                    <div className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "150ms" }} />
-                    <div className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "300ms" }} />
+                    <div
+                      className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce"
+                      style={{ animationDelay: "0ms" }}
+                    />
+                    <div
+                      className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce"
+                      style={{ animationDelay: "150ms" }}
+                    />
+                    <div
+                      className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce"
+                      style={{ animationDelay: "300ms" }}
+                    />
                   </div>
                 </div>
               </div>
@@ -221,7 +255,10 @@ const ChatInterface = ({
           </div>
         </ScrollArea>
 
-        <form onSubmit={handleSubmit} className="p-6 border-t border-border bg-card">
+        <form
+          onSubmit={handleSubmit}
+          className="p-6 border-t border-border bg-card"
+        >
           <div className="flex gap-3">
             <Input
               value={input}
@@ -230,7 +267,11 @@ const ChatInterface = ({
               disabled={isLoading}
               className="flex-1 bg-background border-input"
             />
-            <Button type="submit" disabled={isLoading || !input.trim()} size="icon">
+            <Button
+              type="submit"
+              disabled={isLoading || !input.trim()}
+              size="icon"
+            >
               <Send className="h-4 w-4" />
             </Button>
           </div>
